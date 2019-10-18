@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>597</width>
+    <height>315</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>FAT32 Explorer</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <widget class="QWidget" name="tab">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>224</height>
+          </size>
+         </property>
+         <attribute name="title">
+          <string>Загрузочная запись</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QTableWidget" name="bootTable">
+            <property name="lineWidth">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Таблица FAT</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QTableWidget" name="fatTable"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_3">
+         <attribute name="title">
+          <string>Корневой каталог</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <widget class="QTableWidget" name="rootTable"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>597</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDisk">
+    <property name="title">
+     <string>Меню</string>
+    </property>
+    <addaction name="actionopen"/>
+    <addaction name="actionupdate"/>
+    <addaction name="actioninfo"/>
+   </widget>
+   <addaction name="menuDisk"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actioncreate">
+   <property name="text">
+    <string>create</string>
+   </property>
+  </action>
+  <action name="actionopen">
+   <property name="text">
+    <string>Выбрать диск</string>
+   </property>
+  </action>
+  <action name="reloadAction">
+   <property name="text">
+    <string>обновить</string>
+   </property>
+  </action>
+  <action name="actionupdate">
+   <property name="text">
+    <string>Обновить</string>
+   </property>
+  </action>
+  <action name="actioninfo">
+   <property name="text">
+    <string>Справка</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
