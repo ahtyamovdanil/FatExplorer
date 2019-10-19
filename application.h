@@ -12,12 +12,14 @@ public:
     Application(LPCSTR path);
     Application();
     LPCSTR path;
+    int fat_type;
     void setBootTable(QTableWidget *table);
     void setFatTable(QTableWidget *table);
     void setRootFolder(QTableWidget *qtable);
     void setRootFolder(QTableWidget *qtable, int startSector, int n);
     QString getStringFromUnsignedChar(unsigned char *str, int rev);
     std::string params[21] = {
+        "Идентификатор файловой системы",
         "Байт в секторе",
         "Секторов в кастере",
         "Зарезервировано секторов",
@@ -33,7 +35,8 @@ public:
         //"Режим обновления",
         "Номер устройства",
         //"Номер версии",
-        "Кластер с корневым каталогом"
+        "Кластер с корневым каталогом",
+        "Тип файловой системы"
         //"Среда носителя",
         //"Секторов на дорожке",
         //"Поверхностей",

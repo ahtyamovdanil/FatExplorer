@@ -18,6 +18,7 @@ struct geom{
     unsigned long tracksPerCylinder;
 };
 struct Boot{
+        unsigned char FS_ident[8];
         int BytesPerSector;
         int SectorsPerCluster;
         int ReservedSectors;
@@ -31,6 +32,7 @@ struct Boot{
         int HiddenSectors;
         int DiskNumber;
         int RootFolderCluser;
+        const char* FS_type;
 };
 
 geom getDiskGeometry(LPCSTR path);
@@ -42,9 +44,5 @@ BYTE* getRootFolder(LPCSTR path);
 void printHex(BYTE* array, int length);
 unsigned int hexToDec(BYTE* array, int length);
 std::string getAttributes(int mask);
-/*
-std::string getFileName(BYTE* array){
-    return nullptr;
-}
-*/
+
 #endif //MAIN_PROJECT_FATAPI_H

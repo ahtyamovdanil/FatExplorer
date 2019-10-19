@@ -3,6 +3,8 @@
 #include <QDir>
 #include <QModelIndex>
 #include <mainwindow.h>
+#include <windows.h>
+#include <QPushButton>
 #include <iostream>
 
 SelectDiskDialog::SelectDiskDialog(QWidget *parent) :
@@ -10,12 +12,24 @@ SelectDiskDialog::SelectDiskDialog(QWidget *parent) :
     ui(new Ui::SelectDiskDialog)
 {
     ui->setupUi(this);
-    QList drives = QDir::drives();
-    //connect(ui->buttonBox, SIGNAL(accepted()), SLOT(MainWindow::on_actionopen_triggered()));
-    //auto qlist = new QListWidget;
-    //MainWindow::on_actionopen_triggered()
-    for(int i=0; i<drives.length(); i++)
-       ui->listWidget->addItem(drives[i].absoluteFilePath());
+    QList drives = QDir::drives();    
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+    for(int i=0; i<drives.length(); i++){
+        char NameBuffer[MAX_PATH];
+        char SysNameBuffer[MAX_PATH];
+        DWORD VSNumber;
+        DWORD MCLength;
+        DWORD FileSF;
+        if (GetVolumeInformationA(drives[i].absoluteFilePath().toStdString().c_str(),NameBuffer, sizeof(NameBuffer),
+            &VSNumber,&MCLength,&FileSF,SysNameBuffer,sizeof(SysNameBuffer)))
+        {
+            ui->listWidget->addItem(drives[i].absoluteFilePath() + '\t' + SysNameBuffer);
+            if((strncmp(SysNameBuffer, "FAT", 3))&&(strncmp(SysNameBuffer, "FAT32", 5))){
+                 ui->listWidget->item(i)->setForeground(Qt::gray);
+        }
+    }
+ }
+
 }
 
 SelectDiskDialog::~SelectDiskDialog()
@@ -28,13 +42,19 @@ QString SelectDiskDialog::getSelectedDisk()
     QModelIndex index = ui->listWidget->currentIndex();
     QString itemText = index.data(Qt::DisplayRole).toString();
     return itemText;
-    //return nullptr;
 }
 void SelectDiskDialog::on_buttonBox_accepted()
 {
     QModelIndex index = ui->listWidget->currentIndex();
     QString itemText = index.data(Qt::DisplayRole).toString();
-    emit buttonOkClickedSignal(itemText);
-    //std::cout << itemText.toLocal8Bit().constData() << std::endl;
+    emit buttonOkClickedSignal(itemText);   
     this->close();
+}
+
+void SelectDiskDialog::on_listWidget_itemSelectionChanged()
+{
+    if(ui->listWidget->currentItem()->foreground() != Qt::gray)
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+    else
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }

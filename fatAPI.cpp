@@ -52,6 +52,8 @@ geom getDiskGeometry(LPCSTR path){
 Boot getBootRecord(LPCSTR path){
     BYTE* bootSector = getRaw(path, 0, 1);
     Boot bootStruct;
+    for(int i=0; i<8;i++)
+        bootStruct.FS_ident[i] = bootSector[i+3];
     bootStruct.BytesPerSector =  hexToDec(bootSector+11, 2);
     bootStruct.SectorsPerCluster = (int)bootSector[13];
     bootStruct.ReservedSectors = hexToDec(bootSector+14, 2);
@@ -68,6 +70,12 @@ Boot getBootRecord(LPCSTR path){
     bootStruct.HiddenSectors = hexToDec(bootSector+28, 4);
     bootStruct.DiskNumber = (int)bootSector[36];
     bootStruct.RootFolderCluser = hexToDec(bootSector+44, 4);
+    bootStruct.FS_type = "FAT32";
+    if(bootStruct.SectorsOnDisk/bootStruct.SectorsPerCluster < 65525){
+        //bootStruct.SectorsPerFAT = hexToDec(bootSector+22, 2);
+        bootStruct.FS_type = "FAT16";
+        bootStruct.RootFolderCluser = hexToDec(bootSector+17, 2);
+    }
 
     return bootStruct;
 }
@@ -143,16 +151,6 @@ string getAttributes(int mask){
     return attrList;
 }
 
-/*
-BYTE* getRootStart(LPCSTR path){
-    auto boot = getBootRecord(path);
-
-    //boot.
-    auto rootEntry = boot.ReservedSectors + boot.SectorsPerFAT * boot.FatCopies;
-
-    return getRaw(path, rootEntry, 252);
-};
-*/
 
 
 

@@ -23,6 +23,9 @@ public:
 public slots:
     void on_buttonBox_accepted();
 
+private slots:
+    void on_listWidget_itemSelectionChanged();
+
 private:
     Ui::SelectDiskDialog *ui;
 };

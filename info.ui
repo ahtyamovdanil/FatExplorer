@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>        FatExplorer 0.1</string>
+      <string>        FatExplorer 0.2</string>
      </property>
     </widget>
    </item>

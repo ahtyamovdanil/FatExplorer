@@ -20,17 +20,10 @@ public:
     ~MainWindow();
 
 private slots:
-    //void on_reloadAction_triggered();
 
     void on_actionopen_triggered();
 
     void set_disk(QString path);
-
-    //void on_selectButton_clicked();
-
-    //void on_infoButton_clicked();
-
-    //void on_updateButton_clicked();
 
     void on_actionupdate_triggered();
 
@@ -42,7 +35,13 @@ private slots:
 
     void on_fatTable_cellActivated(int row, int column);
 
-    void customMenuRequested(const QPoint& pos);
+    void fatCustomMenuRequested(const QPoint& pos);
+
+    void bootCustomMenuRequested(const QPoint& pos);
+
+    void rootCustomMenuRequested(const QPoint& pos);
+
+    void setWhite();
 
 private:
     Ui::MainWindow *ui;

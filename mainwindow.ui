@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>FAT32 Explorer</string>
+   <string>FatExplorer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -91,7 +91,13 @@
     <addaction name="actionupdate"/>
     <addaction name="actioninfo"/>
    </widget>
+   <widget class="QMenu" name="menunone">
+    <property name="title">
+     <string>-</string>
+    </property>
+   </widget>
    <addaction name="menuDisk"/>
+   <addaction name="menunone"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actioncreate">
