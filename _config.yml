@@ -2,6 +2,6 @@ theme: jekyll-theme-architect
 show_downloads: true
 
 github:
-  zip_url: https://github.com/ahtyamovdanil/FatExplorer/releases/download/0.2/FatExplorer_v0.2_win64.tar
-  tar_url: https://github.com/ahtyamovdanil/FatExplorer/releases/download/0.2/FatExplorer_v0.2_win64.zip
+  zip_url: https://github.com/ahtyamovdanil/FatExplorer/releases/download/0.2/FatExplorer_v0.2_win64.zip
+  tar_url: https://github.com/ahtyamovdanil/FatExplorer/releases/download/0.2/FatExplorer_v0.2_win64.tar
 
