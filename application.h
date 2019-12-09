@@ -15,8 +15,8 @@ public:
     int fat_type;
     void setBootTable(QTableWidget *table);
     void setFatTable(QTableWidget *table);
-    void setRootFolder(QTableWidget *qtable);
-    void setRootFolder(QTableWidget *qtable, int startSector, int n);
+    void setFolderTable(QTableWidget *qtable);
+    void setFolderTable(QTableWidget *qtable, int startSector, int nSectors);
     QString getStringFromUnsignedChar(unsigned char *str, int rev);
     std::string params[21] = {
         "Идентификатор файловой системы",
@@ -51,7 +51,6 @@ public:
         //"Метка логического диска",
         //"Тип файловой системы"
     };
-    std::string alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
 };
 
 #endif // APPLICATION_H

@@ -17,7 +17,7 @@ struct geom{
     unsigned long sectorsPerTrack;
     unsigned long tracksPerCylinder;
 };
-struct Boot{
+struct boot{
         unsigned char FS_ident[8];
         int BytesPerSector;
         int SectorsPerCluster;
@@ -36,10 +36,9 @@ struct Boot{
 };
 
 geom getDiskGeometry(LPCSTR path);
-Boot getBootRecord(LPCSTR wszPath);
+boot getBootRecord(LPCSTR wszPath);
 BYTE* getFAT(LPCSTR path);
 BYTE* getRaw(LPCSTR wszPath, int start_sector, int n_sectors);
-BYTE* getFolder(LPCSTR path);
 BYTE* getRootFolder(LPCSTR path);
 void printHex(BYTE* array, int length);
 unsigned int hexToDec(BYTE* array, int length);

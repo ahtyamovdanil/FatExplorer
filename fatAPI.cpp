@@ -49,9 +49,9 @@ geom getDiskGeometry(LPCSTR path){
 }
 
 //return structure with info from boot record
-Boot getBootRecord(LPCSTR path){
+boot getBootRecord(LPCSTR path){
     BYTE* bootSector = getRaw(path, 0, 1);
-    Boot bootStruct;
+    boot bootStruct;
     for(int i=0; i<8;i++)
         bootStruct.FS_ident[i] = bootSector[i+3];
     bootStruct.BytesPerSector =  hexToDec(bootSector+11, 2);
@@ -101,6 +101,9 @@ BYTE* getRaw(LPCSTR path, int startSector, int nSectors){
 
 //return array of BYTE with fat table
 BYTE* getFAT(LPCSTR path){
+    auto boot = getBootRecord(path);
+
+    /*
     BYTE* bootSector = getRaw(path, 0, 1);
     //size of fat = 2 bytes
     BYTE size_low = bootSector[36];
@@ -110,8 +113,10 @@ BYTE* getFAT(LPCSTR path){
     BYTE start_high = bootSector[15];
     //convert to decimal format
     int size = 16*16*(int)size_high + (int)size_low;
+    std::cout << size << std::endl;
     int start = 16*16*(int)start_high + (int)start_low;
-    return getRaw(path, start, size);
+    */
+    return getRaw(path, boot.ReservedSectors, boot.SectorsPerFAT);
 }
 
 //print array of hex numbers to console
@@ -123,11 +128,6 @@ void printHex(BYTE* array, int length){
         if((currentpos+1) % 16 == 0)
             cout <<std::endl;
     }
-}
-
-BYTE* getFolder(LPCSTR path){
-    //getRaw(path)
-    return nullptr;
 }
 
 BYTE* getRootFolder(LPCSTR path){

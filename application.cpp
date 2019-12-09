@@ -52,10 +52,13 @@ void Application::setBootTable(QTableWidget *qtable){
 }
 
 void Application::setFatTable(QTableWidget *qtable){
-    int columns = 10;
-    int rows = 1000;
+    auto boot = getBootRecord(path);
     int size;
     (this->fat_type == 32)? size = 4: size = 2;
+    int columns = 10;
+    //int rows = 1254;
+    int rows = boot.SectorsPerFAT * boot.BytesPerSector /size / 10;
+    std::cout << rows << std::endl;
     qtable->setColumnCount(columns);
     qtable->setRowCount(rows);
     qtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -63,7 +66,7 @@ void Application::setFatTable(QTableWidget *qtable){
         qtable->setColumnWidth(i, 50);
     }
     qtable->setHorizontalHeaderLabels({ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<rows; i++){
         qtable->setVerticalHeaderItem(i, new QTableWidgetItem(std::to_string(i*10).c_str()));
     }
     auto fatTable = getFAT(path);
@@ -81,16 +84,16 @@ void Application::setFatTable(QTableWidget *qtable){
     qtable->setItem(0, 1, new QTableWidgetItem("RES"));
 }
 
-void Application::setRootFolder(QTableWidget *qtable){
+void Application::setFolderTable(QTableWidget *qtable){
     qtable->clear();
     qtable->setColumnCount(5);
     qtable->setRowCount(1000);
     qtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     qtable->setColumnWidth(0, 170);
     qtable->setHorizontalHeaderLabels({ "Имя", "Расширение", "Атрибуты", "1-й кластер", "Размер (байт)"});
-
     auto rootArray = getRootFolder(path);
     //auto rootArray = getRaw(path, 8324, 2);
+
     for(int i=0; i<8192; i+=32){
         std::string myStr;
         if(rootArray[i]==229)
@@ -105,10 +108,6 @@ void Application::setRootFolder(QTableWidget *qtable){
         unsigned char fileName[8] = {rootArray[i], rootArray[i+1], rootArray[i+2], rootArray[i+3],
                                   rootArray[i+4], rootArray[i+5], rootArray[i+6], rootArray[i+7]};
 
-        //QString testStr = getStringFromUnsignedChar(fileName, 8);
-        //qDebug() << testStr;
-        //auto qb = QByteArray(rootArray,8);
-        //std::cout << "----" << QString::fromUtf8(reinterpret_cast<char*>(fileName), 8) << "----" << std::endl;
         unsigned char fileExt[3] = {rootArray[i+8], rootArray[i+9], rootArray[i+10]};
         BYTE fileAtr = rootArray[i+11];
         std::string name(reinterpret_cast<char*>(fileName), 8);
@@ -119,7 +118,6 @@ void Application::setRootFolder(QTableWidget *qtable){
             break;
         if(rootArray[i+11]==15){
             qtable->setItem(i/32, 0, new QTableWidgetItem("lfn"));
-            //qtable->item(i/32, 0)->setBackground(Qt::lightGray);
             continue;
         }
         else{
@@ -129,19 +127,16 @@ void Application::setRootFolder(QTableWidget *qtable){
             qtable->setItem(i/32, 4, new QTableWidgetItem(QString::number(entry)));
         }
         if(rootArray[i] == 'x'){
-            //qtable->item(i/32, 0)->setBackground(Qt::gray);
         }
         std::string attr = getAttributes(rootArray[i+11]);
         qtable->setItem(i/32, 2, new QTableWidgetItem(attr.c_str()));
         if((rootArray[i+11] & 16) != 0){
-            //qtable->setItem(i/32, 2, new QTableWidgetItem("КАТ"));
             if(rootArray[i] != 'x'){
                 qtable->item(i/32, 0)->setBackground(Qt::gray);
                 qtable->item(i/32, 1)->setBackground(Qt::gray);
                 qtable->item(i/32, 2)->setBackground(Qt::gray);
                 qtable->item(i/32, 3)->setBackground(Qt::gray);
                 qtable->item(i/32, 4)->setBackground(Qt::gray);
-                //qtable->item(i/32, 4)->setBackground(Qt::gray);
             }
 
         }
@@ -149,9 +144,9 @@ void Application::setRootFolder(QTableWidget *qtable){
     }
 }
 
-void Application::setRootFolder(QTableWidget *qtable, int startCluster, int nSectors){
+void Application::setFolderTable(QTableWidget *qtable, int startCluster, int nSectors){
     if(startCluster == 0){
-        setRootFolder(qtable);
+        setFolderTable(qtable);
         return;
     }
     qtable->clear();
@@ -164,10 +159,24 @@ void Application::setRootFolder(QTableWidget *qtable, int startCluster, int nSec
     //auto rootArray = getRootFolder(path);
 
     auto boot = getBootRecord(path);
-    //int a;
-    //int a = (fat_type == 32) ? boot.RootFolderCluser: 0;
-        auto rootArray = getRaw(path, boot.ReservedSectors + boot.SectorsPerFAT * boot.FatCopies +
-                                (startCluster-((fat_type == 32) ? boot.RootFolderCluser: 0))*boot.SectorsPerCluster , nSectors);
+
+    auto rootArray = getRaw(path, boot.ReservedSectors + boot.SectorsPerFAT * boot.FatCopies +
+                           (startCluster - boot.RootFolderCluser) * boot.SectorsPerCluster , nSectors);
+
+    if(fat_type == 16){
+        rootArray = getRaw(path, boot.ReservedSectors + boot.SectorsPerFAT * boot.FatCopies + 32
+                           + (startCluster - 2) * boot.SectorsPerCluster, nSectors);
+
+        std::cout <<  boot.ReservedSectors + boot.SectorsPerFAT * boot.FatCopies + 32
+                      + (startCluster - 2) * boot.SectorsPerCluster << std::endl;
+
+        std::cout <<  boot.ReservedSectors << ' '
+                   << boot.SectorsPerFAT << ' '
+                   << boot.FatCopies << ' '
+                   << startCluster << ' '
+                   << boot.SectorsPerCluster << std::endl;
+    }
+
 
     for(int i=0; i<8192; i+=32){
         std::string myStr;
@@ -188,18 +197,7 @@ void Application::setRootFolder(QTableWidget *qtable, int startCluster, int nSec
         std::string ext(reinterpret_cast<char*>(fileExt), 3);
         unsigned int size = hexToDec(rootArray+i+26, 2);
         unsigned int entry = hexToDec(rootArray+i+28, 4);
-        //QString str = (reinterpret_cast<char *>(array));
-        /*
-        std::string str = "фыва";
-        str[0] = 'р';
-        for(int j=0; j<8; j++){
-            std::cout<<(int)s[j]<<std::endl;
-            if(256+(int)s[j]>127 && 256+(int)s[j]<256){
-                str[j] = 'э';//alph[array[j]-128];
-                std::cout<<"ololo"<<std::endl;
-            }
-        }
-        */
+
         if(filename[0]==0)
             break;
         if(rootArray[i+11]==15){
@@ -219,14 +217,12 @@ void Application::setRootFolder(QTableWidget *qtable, int startCluster, int nSec
         std::string attr = getAttributes(rootArray[i+11]);
         qtable->setItem(i/32, 2, new QTableWidgetItem(attr.c_str()));
         if((rootArray[i+11] & 16) != 0){
-            //qtable->setItem(i/32, 2, new QTableWidgetItem("КАТ"));
             if(rootArray[i] != 'x'){
                 qtable->item(i/32, 0)->setBackground(Qt::gray);
                 qtable->item(i/32, 1)->setBackground(Qt::gray);
                 qtable->item(i/32, 2)->setBackground(Qt::gray);
                 qtable->item(i/32, 3)->setBackground(Qt::gray);
                 qtable->item(i/32, 4)->setBackground(Qt::gray);
-                //qtable->item(i/32, 4)->setBackground(Qt::gray);
             }
 
         }
@@ -239,18 +235,14 @@ QString Application::getStringFromUnsignedChar(unsigned char *str, int rev)
 
     QString s;
     QString result = "";
-    //int rev = std::strlen(str);
-
     // Print String in Reverse order....
-    for ( int i = 0; i<rev; i++)
-        {
+    for ( int i = 0; i<rev; i++){
            s = QString("%1").arg(str[i],0,16);
-
            if(s == "0"){
               s="00";
-             }
+           }
          result.append(s);
 
-         }
+        }
    return result;
 }

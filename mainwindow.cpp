@@ -47,11 +47,10 @@ void MainWindow::set_disk(QString path)
     LPCSTR wszPath = final_path;
 
     this->app =  new Application(wszPath);
-    //std::cout<<std::string(app->path)<< " " << 1 << std::endl;
     ui->menunone->setTitle(path);
     app->setBootTable(ui->bootTable);
-    app->setFatTable(ui->fatTable); //todo
-    app->setRootFolder(ui->rootTable);
+    app->setFatTable(ui->fatTable);
+    app->setFolderTable(ui->rootTable);
     ui->fatTable->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->bootTable->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->rootTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -71,11 +70,9 @@ void MainWindow::set_disk(QString path)
 
 void MainWindow::on_actionupdate_triggered()
 {
-    //std::cout<<std::string(this->app->path)<<std::endl;
     this->app->setBootTable(ui->bootTable);
-    this->app->setFatTable(ui->fatTable);  //todo
-    //ui->rootTable->clear();
-    this->app->setRootFolder(ui->rootTable);   
+    this->app->setFatTable(ui->fatTable);
+    this->app->setFolderTable(ui->rootTable);
     ui->rootTable->update();
     ui->fatTable->update();
 
@@ -97,7 +94,7 @@ void MainWindow::on_actioninfo_triggered()
 void MainWindow::on_rootTable_cellDoubleClicked(int row, int column)
 {
     if(ui->rootTable->item(row,0)->background() == Qt::gray){
-        this->app->setRootFolder(ui->rootTable, ui->rootTable->item(row, 3)->text().toInt(), 10);
+        this->app->setFolderTable(ui->rootTable, ui->rootTable->item(row, 3)->text().toInt(), 10);
         ui->rootTable->scrollToTop();
         ui->fatTable->update();
     }
@@ -107,48 +104,23 @@ void MainWindow::on_fatTable_cellClicked(int row, int column)
 {
     std::function<bool(int,int)> forward;
     forward = [&](int r, int c) {
-        //std::cout << ui->fatTable->item(r, c)->text().toInt() << std::endl;
-        //std::cout << r << ' ' << c << std::endl;
         if((ui->fatTable->item(r, c)->text().toStdString() == "RES") ||
            (ui->fatTable->item(r, c)->text().toStdString() == "0"))
             return false;
         else
             if(ui->fatTable->item(r, c)->text().toStdString() == "EOC"){
                 ui->fatTable->item(r,c)->setSelected(true);
-                //ui->fatTable->item(r, c)->setBackground(Qt::green);
                 return false;
             }
         else
         {
             ui->fatTable->item(r,c)->setSelected(true);
-            //ui->fatTable->item(r, c)->setBackground(Qt::green);
             int clmn_nxt = ui->fatTable->item(r, c)->text().toInt() % 10;
             int row_nxt = ui->fatTable->item(r, c)->text().toInt()/10;
             return (forward(row_nxt, clmn_nxt));
         }
     };
 
-    std::function<bool(int,int)> backward;
-    backward = [&](int r, int c) {
-        //std::cout << ui->fatTable->item(r, c)->text().toInt() << std::endl;
-        //std::cout << r << ' ' << c << std::endl;
-        std::cout << ui->fatTable->item(r, c)->text().toInt() << ' ' << r*10+c << std::endl;
-        if(r==0 && c==0)
-            return false;
-
-        int row_nxt = c-1;
-        int clmn_nxt = r==0? 9: r-1;
-
-        if((ui->fatTable->item(r, c)->text().toStdString() == "RES") ||
-           (ui->fatTable->item(r, c)->text().toStdString() == "0") ||
-            (ui->fatTable->item(r, c)->text().toStdString() == "EOC"))
-            return (forward(row_nxt, clmn_nxt));
-        else
-            if(ui->fatTable->item(r, c)->text().toInt() == r*10+c){
-                ui->fatTable->item(r,c)->setSelected(true);
-            return (forward(row_nxt, clmn_nxt));
-            }
-    };
     int cur_row = row;
     int cur_col = column;
     for(int i=row; i>=0; i--)
@@ -160,32 +132,26 @@ void MainWindow::on_fatTable_cellClicked(int row, int column)
                 cur_col = j;
             }
         }
+
     forward(row, column);
-    //backward(row, column);
 
 }
 
 void MainWindow::on_fatTable_cellActivated(int row, int column){}
 
 void MainWindow::setWhite(){
-    //this->setStyleSheet("background-color: white;");
     MainWindow::setStyleSheet("QMainWindow{background-color: white}");
     ui->bootTable->setStyleSheet("background-color: white");
 }
 
 void MainWindow::bootCustomMenuRequested(const QPoint& pos){
-    std::cout<<"lolkek"<<std::endl;
     QPoint qpoint = ui->bootTable->viewport()->mapToGlobal(pos);
-    //QPoint qpoint = qtable->viewport()->mapToGlobal(pos);
     auto menu = QMenu();
     auto copyAction = menu.addAction("Копировать");
     QAction *action =  menu.exec(qpoint);
     if (action == copyAction){
         QAbstractItemModel * model = ui->bootTable->model();
         QItemSelectionModel * selection = ui->bootTable->selectionModel();
-
-        //QAbstractItemModel * model = qtable->model();
-        //QItemSelectionModel * selection = qtable->selectionModel();
         QModelIndexList indexes = selection->selectedIndexes();
 
         qSort(indexes);

@@ -20,10 +20,14 @@ SelectDiskDialog::SelectDiskDialog(QWidget *parent) :
         DWORD VSNumber;
         DWORD MCLength;
         DWORD FileSF;
-        if (GetVolumeInformationA(drives[i].absoluteFilePath().toStdString().c_str(),NameBuffer, sizeof(NameBuffer),
+        if (GetVolumeInformationA(drives[i].absoluteFilePath().toStdString().c_str(), NameBuffer, sizeof(NameBuffer),
             &VSNumber,&MCLength,&FileSF,SysNameBuffer,sizeof(SysNameBuffer)))
         {
-            ui->listWidget->addItem(drives[i].absoluteFilePath() + '\t' + SysNameBuffer);
+            if(!strncmp(SysNameBuffer, "FAT", 3) && (strncmp(SysNameBuffer, "FAT32", 5)))
+                ui->listWidget->addItem(drives[i].absoluteFilePath() + '\t' + SysNameBuffer +"16");
+            else
+                ui->listWidget->addItem(drives[i].absoluteFilePath() + '\t' + SysNameBuffer);
+
             if((strncmp(SysNameBuffer, "FAT", 3))&&(strncmp(SysNameBuffer, "FAT32", 5))){
                  ui->listWidget->item(i)->setForeground(Qt::gray);
         }
