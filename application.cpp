@@ -4,6 +4,8 @@
 #include <QByteArray>
 #include <cstring>
 #include <QDebug>
+#include <QCoreApplication>
+#include <QApplication>
 
 Application::Application(LPCSTR path){
     this->path = path;
@@ -78,6 +80,7 @@ void Application::setFatTable(QTableWidget *qtable){
                 continue;
             }
             qtable->setItem(i, j, new QTableWidgetItem(std::to_string(value).c_str()));
+            QCoreApplication::instance()->processEvents();
         }
     }
     qtable->setItem(0, 0, new QTableWidgetItem("RES"));
@@ -100,10 +103,12 @@ void Application::setFolderTable(QTableWidget *qtable){
             rootArray[i] = 'x';
         QString filename = "        ";
         for(int j=0; j<8; j++){
+            QCoreApplication::processEvents();
             if((rootArray[i+j] >= 128)&&(rootArray[i+j] <= 159))
                 filename[j] = QChar(rootArray[i+j]+912);
             else
                 filename[j] = QChar(rootArray[i+j]);
+            QApplication::instance()->processEvents();
         }
         unsigned char fileName[8] = {rootArray[i], rootArray[i+1], rootArray[i+2], rootArray[i+3],
                                   rootArray[i+4], rootArray[i+5], rootArray[i+6], rootArray[i+7]};
@@ -157,6 +162,7 @@ void Application::setFolderTable(QTableWidget *qtable, int startCluster, int nSe
     qtable->setHorizontalHeaderLabels({ "Имя", "Расширение", "Атрибуты", "1-й кластер", "Размер (байт)"});
 
     //auto rootArray = getRootFolder(path);
+    std::cout<<startCluster<<std::endl;
 
     auto boot = getBootRecord(path);
 
@@ -226,7 +232,7 @@ void Application::setFolderTable(QTableWidget *qtable, int startCluster, int nSe
             }
 
         }
-
+    QApplication::instance()->processEvents();
     }
 }
 

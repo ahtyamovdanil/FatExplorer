@@ -30,14 +30,16 @@ SOURCES += \
         info.cpp \
         main.cpp \
         mainwindow.cpp \
-        selectDiskDialog.cpp
+        selectDiskDialog.cpp \
+        waitingspinnerwidget.cpp
 
 HEADERS += \
         application.h \
         fatAPI.h \
         info.h \
         mainwindow.h \
-        selectDiskDialog.h
+        selectDiskDialog.h \
+        waitingspinnerwidget.h
 
 FORMS += \
         info.ui \
@@ -49,3 +51,6 @@ win32:RC_ICONS += icon.ico
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    qtwaitingspinner.pri

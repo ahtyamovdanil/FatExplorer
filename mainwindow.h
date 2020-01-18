@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
-    Application* app;
+    Application* app = nullptr;
     ~MainWindow();
 
 private slots:
@@ -42,6 +42,10 @@ private slots:
     void rootCustomMenuRequested(const QPoint& pos);
 
     void setWhite();
+
+    void call_set_fat(QTableWidget *qtable);
+
+    //void longOperation();
 
 private:
     Ui::MainWindow *ui;

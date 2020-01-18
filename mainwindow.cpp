@@ -17,7 +17,13 @@
 #include <QClipboard>
 #include <QMimeData>
 #include <QTimer>
+#include <QWidget>
 #include "info.h"
+#include <waitingspinnerwidget.h>
+#include <QThread>
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
+//#include <QtWaitingSpinner/waitingspinnerwidget.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,25 +38,53 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionopen_triggered()
 {
+
+
+    WaitingSpinnerWidget* spinner = new WaitingSpinnerWidget(this);
+
+    spinner->setRoundness(70.0);
+    spinner->setMinimumTrailOpacity(15.0);
+    spinner->setTrailFadePercentage(70.0);
+    spinner->setNumberOfLines(12);
+    spinner->setLineLength(10);
+    spinner->setLineWidth(5);
+    spinner->setInnerRadius(10);
+    spinner->setRevolutionsPerSecond(1);
+    spinner->setColor(QColor(81, 4, 71));
+
+    spinner->start();
+
     SelectDiskDialog selDialog;
     connect(&selDialog, SIGNAL(buttonOkClickedSignal(QString)), this, (SLOT(set_disk(QString))));
     selDialog.setModal(true);
     selDialog.exec();
+
+    spinner->stop();
 }
 
 void MainWindow::set_disk(QString path)
 {
+
     char letter = path.toStdString().c_str()[0];
     char *final_path = new char[8]{'\\','\\','.','\\','-',':'};
     //{"\\\\.\\-:"};
     final_path[4] = letter;
     LPCSTR wszPath = final_path;
 
-    this->app =  new Application(wszPath);
+    this->app = new Application(wszPath);
     ui->menunone->setTitle(path);
-    app->setBootTable(ui->bootTable);
-    app->setFatTable(ui->fatTable);
-    app->setFolderTable(ui->rootTable);
+
+    QFuture<void> b =  QtConcurrent::run(this->app, &Application::setBootTable, ui->bootTable);
+    b.waitForFinished();
+
+    QFuture<void> c =  QtConcurrent::run(this->app, &Application::setFolderTable, ui->rootTable);
+    c.waitForFinished();
+
+    QFuture<void> f =  QtConcurrent::run(this->app, &Application::setFatTable, ui->fatTable);
+    f.waitForFinished();
+
+    //spinner->stop(); //test
+
     ui->fatTable->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->bootTable->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->rootTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -70,17 +104,42 @@ void MainWindow::set_disk(QString path)
 
 void MainWindow::on_actionupdate_triggered()
 {
+    if(this->app == nullptr){
+        return;
+    }
+
+    WaitingSpinnerWidget* spinner = new WaitingSpinnerWidget(this);
+
+    spinner->setRoundness(70.0);
+    spinner->setMinimumTrailOpacity(15.0);
+    spinner->setTrailFadePercentage(70.0);
+    spinner->setNumberOfLines(12);
+    spinner->setLineLength(10);
+    spinner->setLineWidth(5);
+    spinner->setInnerRadius(10);
+    spinner->setRevolutionsPerSecond(1);
+    spinner->setColor(QColor(81, 4, 71));
+
+    spinner->start();
+
     this->app->setBootTable(ui->bootTable);
+    //QThread *thread = QThread::create(this->call_set_fat( ui->fatTable));
     this->app->setFatTable(ui->fatTable);
     this->app->setFolderTable(ui->rootTable);
     ui->rootTable->update();
     ui->fatTable->update();
+
+    spinner->stop();
 
     MainWindow::setStyleSheet("QMainWindow{background-color: grey}");
     auto mTimer = new QTimer(this);
     mTimer->setSingleShot(true);
     connect(mTimer, SIGNAL(timeout()), SLOT(setWhite()));
     mTimer->start(125);
+}
+
+void MainWindow::call_set_fat(QTableWidget *qtable){
+    this->app->setFatTable(qtable);
 }
 
 void MainWindow::on_actioninfo_triggered()
@@ -102,8 +161,10 @@ void MainWindow::on_rootTable_cellDoubleClicked(int row, int column)
 
 void MainWindow::on_fatTable_cellClicked(int row, int column)
 {
-    std::function<bool(int,int)> forward;
+    int limit = 2000;
+    std::function<bool(int,int)> forward;   
     forward = [&](int r, int c) {
+        //std::cout << ui->fatTable->item(r, c)->text().toInt() << ' ' << r*10+c << std::endl;
         if((ui->fatTable->item(r, c)->text().toStdString() == "RES") ||
            (ui->fatTable->item(r, c)->text().toStdString() == "0"))
             return false;
@@ -117,24 +178,34 @@ void MainWindow::on_fatTable_cellClicked(int row, int column)
             ui->fatTable->item(r,c)->setSelected(true);
             int clmn_nxt = ui->fatTable->item(r, c)->text().toInt() % 10;
             int row_nxt = ui->fatTable->item(r, c)->text().toInt()/10;
+            limit --;
+            std::cout << limit << std::endl;
+            if(limit == 0)
+                return false;
             return (forward(row_nxt, clmn_nxt));
         }
     };
 
+    forward(row, column);
+
     int cur_row = row;
     int cur_col = column;
+    limit = 1000;
     for(int i=row; i>=0; i--)
         for(int j=9; j>=0; j--){
-            std::cout << ui->fatTable->item(i, j)->text().toInt() << ' ' << cur_row*10+cur_col << std::endl;
+            //std::cout << ui->fatTable->item(i, j)->text().toInt() << ' ' << cur_row*10+cur_col << std::endl;
+            std::cout << limit << std::endl;
             if(ui->fatTable->item(i, j)->text().toInt() == cur_row*10+cur_col){
                 ui->fatTable->item(i, j)->setSelected(true);
                 cur_row = i;
                 cur_col = j;
+                limit --;
+                if(limit==0)
+                   i=0;
+
             }
+
         }
-
-    forward(row, column);
-
 }
 
 void MainWindow::on_fatTable_cellActivated(int row, int column){}
@@ -183,7 +254,7 @@ void MainWindow::bootCustomMenuRequested(const QPoint& pos){
 }
 
 void MainWindow::fatCustomMenuRequested(const QPoint& pos){
-    std::cout<<"lolkek"<<std::endl;
+    //std::cout<<"lolkek"<<std::endl;
     QPoint qpoint = ui->fatTable->viewport()->mapToGlobal(pos);
     //QPoint qpoint = qtable->viewport()->mapToGlobal(pos);
     auto menu = QMenu();
@@ -226,7 +297,7 @@ void MainWindow::fatCustomMenuRequested(const QPoint& pos){
 }
 
 void MainWindow::rootCustomMenuRequested(const QPoint& pos){
-    std::cout<<"lolkek"<<std::endl;
+    //std::cout<<"lolkek"<<std::endl;
     QPoint qpoint = ui->rootTable->viewport()->mapToGlobal(pos);
     //QPoint qpoint = qtable->viewport()->mapToGlobal(pos);
     auto menu = QMenu();
