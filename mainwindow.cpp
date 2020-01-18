@@ -126,6 +126,7 @@ void MainWindow::on_actionupdate_triggered()
     //QThread *thread = QThread::create(this->call_set_fat( ui->fatTable));
     this->app->setFatTable(ui->fatTable);
     this->app->setFolderTable(ui->rootTable);
+    this->app->pointer = 0;
     ui->rootTable->update();
     ui->fatTable->update();
 
@@ -152,10 +153,28 @@ void MainWindow::on_actioninfo_triggered()
 
 void MainWindow::on_rootTable_cellDoubleClicked(int row, int column)
 {
+    std::cout << "---------------------" << std::endl;
     if(ui->rootTable->item(row,0)->background() == Qt::gray){
+         std::cout << (ui->rootTable->item(row, 0)->text().toStdString().substr(0, 2)) << std::endl;
+        if(ui->rootTable->item(row, 0)->text().toStdString().substr(0, 2) == ".."){
+           app->pointer --;
+           std::cout << "pointer1 " << app->pointer << std::endl;
+           ui->tabWidget->setTabText(2, QString::fromStdString((app->folders[app->pointer])));
+        }
+        else
+        if(ui->rootTable->item(row, 0)->text().toStdString().substr(0, 2) != ". "){
+           app->pointer ++;
+           std::cout << "pointer2 " << app->pointer << std::endl;
+           app->folders[app->pointer] = ui->rootTable->item(row, 0)->text().toStdString();
+           ui->tabWidget->setTabText(2, ui->rootTable->item(row, 0)->text());
+        }
+        std::cout << "is equal " << (app->folders[app->pointer].substr(0, 2) == "..") << std::endl;
+        std::cout << "element " << app->folders[app->pointer] << std::endl;
+        //std::cout << (app->folders[pointer].compare("..")) << std::endl;
+        //std::cout << ui->rootTable->item(row, 0)->text().toStdString() << std::endl;
         this->app->setFolderTable(ui->rootTable, ui->rootTable->item(row, 3)->text().toInt(), 10);
         ui->rootTable->scrollToTop();
-        ui->fatTable->update();
+        ui->fatTable->update();        
     }
 }
 

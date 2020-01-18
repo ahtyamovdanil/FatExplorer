@@ -107,7 +107,7 @@
   </action>
   <action name="actionopen">
    <property name="text">
-    <string>Выбрать диск</string>
+    <string>Выбор тома</string>
    </property>
   </action>
   <action name="reloadAction">

@@ -13,10 +13,12 @@ public:
     Application();
     LPCSTR path;
     int fat_type;
+    std::string folders[5] = {"Корневой каталог","","","",""};
     void setBootTable(QTableWidget *table);
     void setFatTable(QTableWidget *table);
     void setFolderTable(QTableWidget *qtable);
     void setFolderTable(QTableWidget *qtable, int startSector, int nSectors);
+    int pointer = 0;
     QString getStringFromUnsignedChar(unsigned char *str, int rev);
     std::string params[21] = {
         "Идентификатор файловой системы",
